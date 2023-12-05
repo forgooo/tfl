@@ -1,0 +1,8 @@
+{
+"name": "Ivan", 
+"age": 19,
+"devices": [
+"PC", "Laptop"
+],
+"married": false
+}
