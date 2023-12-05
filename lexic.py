@@ -1,66 +1,144 @@
 import re
 
+keywords = ["for", "do"]
+
 class Token:
     def __init__(self, token_name, token_value):
         self.token_name = token_name
         self.token_value = token_value
 
-    def __str__(self):
-        return f'Token({self.token_name}, {self.token_value})'
+class LexemeTable:
+    def __init__(self, tok, next=None):
+        self.tok = tok
+        self.next = next
 
-class Lexer:
-    def __init__(self, input_string):
-        self.input_string = input_string
-        self.keywords = set(["for", "do"])
-        self.symbols = set(["(", ")", ";", "<", ">", "="])
-        self.current_position = 0
+lt = None
+lt_head = None
 
-    def is_keyword(self, word):
-        return word in self.keywords
+def lexer(filename):
+    try:
+        with open(filename, 'r') as fd:
+            CS = 'H'
+            c = fd.read(1)
+            
+            while c:
+                if CS == 'H':
+                    while c.isspace():
+                        c = fd.read(1)
+                    if re.match(r'[A-Za-z_]', c):
+                        CS = 'ID'
+                    elif re.match(r'[0-9.]|[+-]', c):
+                        CS = 'NM'
+                    elif c == ':':
+                        CS = 'ASGN'
+                    else:
+                        CS = 'DLM'
+                
+                if CS == 'ASGN':
+                    colon = c
+                    c = fd.read(1)
+                    if c == '=':
+                        tok = Token('OPER', ':=')
+                        add_token(tok)
+                        c = fd.read(1)
+                        CS = 'H'
+                    else:
+                        err_symbol = colon
+                        CS = 'ERR'
+                
+                if CS == 'DLM':
+                    if c in '();':
+                        tok = Token('DELIM', c)
+                        add_token(tok)
+                        c = fd.read(1)
+                        CS = 'H'
+                    elif c in '<>=':
+                        tok = Token('OPER', c)
+                        add_token(tok)
+                        c = fd.read(1)
+                        CS = 'H'
+                    else:
+                        err_symbol = c
+                        c = fd.read(1)
+                        CS = 'ERR'
+                
+                if CS == 'ERR':
+                    print(f"Unknown character: {err_symbol}")
+                    CS = 'H'
+                
+                if CS == 'ID':
+                    buf = c
+                    c = fd.read(1)
+                    while re.match(r'[A-Za-z0-9_]', c):
+                        buf += c
+                        c = fd.read(1)
+                    if is_kword(buf):
+                        tok = Token('KWORD', buf)
+                    else:
+                        tok = Token('IDENT', buf)
+                    add_token(tok)
+                    CS = 'H'
+                
+                if CS == 'NM':
+                    buf = c
+                    c = fd.read(1)
+                    while re.match(r'[0-9.]', c):
+                        buf += c
+                        c = fd.read(1)
+                    if is_num(buf):
+                        tok = Token('NUM', buf)
+                    else:
+                        tok = Token('ERR', buf)
+                    add_token(tok)
+                    CS = 'H'
+    
+    except IOError:
+        print(f"Cannot open file {filename}")
 
-    def is_symbol(self, char):
-        return char in self.symbols
+def is_kword(id):
+    return id in keywords
 
-    def lex(self):
-        tokens = []
-        while self.current_position < len(self.input_string):
-            char = self.input_string[self.current_position]
-            if char.isspace():
-                self.current_position += 1
-            elif char in self.symbols:
-                tokens.append(Token("DLM", char))
-                self.current_position += 1
-            elif char == ":" and self.input_string[self.current_position + 1] == "=":
-                tokens.append(Token("ASGN", ":="))
-                self.current_position += 2
-            elif re.match(r"[a-zA-Z_]", char):
-                word = ""
-                while self.current_position < len(self.input_string) and \
-                        re.match(r"[a-zA-Z0-9_]", self.input_string[self.current_position]):
-                    word += self.input_string[self.current_position]
-                    self.current_position += 1
-                if self.is_keyword(word):
-                    tokens.append(Token("KWORD", word))
-                else:
-                    tokens.append(Token("IDENT", word))
-            elif re.match(r"[0-9]", char) or (char == "-" and re.match(r"[0-9]", self.input_string[self.current_position + 1])):
-                number = ""
-                while self.current_position < len(self.input_string) and \
-                        re.match(r"[0-9.+-eE]", self.input_string[self.current_position]):
-                    number += self.input_string[self.current_position]
-                    self.current_position += 1
-                tokens.append(Token("NM", number))
-            else:
-                tokens.append(Token("ERR", char))
-                self.current_position += 1
-        return tokens
+def is_num(num):
+    # Строгие проверки формата чисел
+    if re.match(r'^[+-]?\d+$', num):  # Целые числа
+        return True
+    if re.match(r'^[+-]?\d+\.\d*$', num) or re.match(r'^[+-]?\d*\.\d+$', num):  # Числа с плавающей точкой
+        return True
+    return False
 
-# Чтение строки из файла
-with open('file.txt', 'r') as file:
-    input_string = file.read()
+def add_token(tok):
+    global lt, lt_head
+    new_lexeme = LexemeTable(tok)
+    if lt is None:
+        lt = new_lexeme
+        lt_head = new_lexeme
+    else:
+        lt.next = new_lexeme
+        lt = new_lexeme
 
-lexer = Lexer(input_string)
-tokens = lexer.lex()
+if __name__ == "__main__":
+    lexer("code.txt")
+    
+    current = lt_head
+    while current:
+        token_name = ""
+        if current.tok.token_name == 'KWORD':
+            token_name = "Keyword"
+        elif current.tok.token_name == 'IDENT':
+            token_name = "Identifier"
+        elif current.tok.token_name == 'NUM':
+            token_name = "Number"
+        elif current.tok.token_name == 'OPER':
+            token_name = "Operator"
+        elif current.tok.token_name == 'DELIM':
+            token_name = "Delimiter"
+        else:
+            token_name = "Unknown"
+        print(f"{token_name}: {current.tok.token_value}")
+        current = current.next
 
-for token in tokens:
-    print(token)
+    current = lt_head
+    while current:
+        temp = current
+        current = current.next
+        del temp
