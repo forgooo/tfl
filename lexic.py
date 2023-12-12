@@ -127,7 +127,7 @@ def add_token(tok):
         lt = new_lexeme
 
 
-lexer("/Users/marina/PycharmProjects/TFL/test")
+lexer("code.txt")
 
 current = lt_head
 while current:
