@@ -1,8 +1,8 @@
 import re
-from utils import *
+from token import *
 
 
-class LexicalAnalyzer:
+class Lexical: # dodelal
     def __init__(self, filename: str, identifiersTable):
         self.identifiersTable = identifiersTable
         self.states = States("H", "COMM", "ID", "ERR", "NM", "DLM")
@@ -20,7 +20,7 @@ class LexicalAnalyzer:
         self.error = Error(filename)
         self.lexeme_table = []
 
-    def analysis(self):
+    def analysis(self): # dodelal
         self.current.state = self.states.H
         self.current.re_assign(*next(self.fgetc))
         while not self.current.eof_state:
