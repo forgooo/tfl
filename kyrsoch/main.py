@@ -1,14 +1,14 @@
-from LexicalAnalizer import LexicalAnalyzer
-from SyntacticalAnalyzer import SyntacticalAnalyzer
-from SemanticalAnalyzer import IdentifiersTable
+from lexer import Lexical
+from syntax import Syntax
+from semantic import IdenTable
 
 PRINT_INFO = True
-PATH_TO_PROGRAM = "second_program.poullang"
+PATH_TO_PROGRAM = "test"
 
 
 def main():
-    identifiersTable = IdentifiersTable()
-    lexer = LexicalAnalyzer(PATH_TO_PROGRAM, identifiersTable)
+    identifiersTable = IdenTable()
+    lexer = Lexical(PATH_TO_PROGRAM, identifiersTable)
     lexer.analysis()
     if lexer.current.state != lexer.states.ERR:
         if PRINT_INFO:
@@ -17,14 +17,10 @@ def main():
                 print(f"{i.token_name} {i.token_value}")
 
 
-        syntaxAnalyzer = SyntacticalAnalyzer(lexer.lexeme_table, identifiersTable)
+        syntaxAnalyzer = Syntax(lexer.lexeme_table, identifiersTable)
         syntaxAnalyzer.PROGRAMM()
-        identifiersTable.check_if_all_described() # проверка что все Id описаны
-        if PRINT_INFO:
-            print(identifiersTable)
-        print("+---------+")
-        print("| SUCCESS |")
-        print("+---------+")
+        identifiersTable.check_if_all_described()
+        print("!!!COMPILED")
 
 if __name__ == "__main__":
     main()
