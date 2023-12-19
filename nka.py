@@ -10,6 +10,7 @@ def epsilon_closure(states, transitions, epsilon='eps'):
                     stack.append(transition[2])
     return closure
 
+
 def move(states, transitions, symbol):
     result = set()
     for state in states:
@@ -17,6 +18,7 @@ def move(states, transitions, symbol):
             if transition[0] == state and transition[1] == symbol:
                 result.add(transition[2])
     return result
+
 
 def nfa_to_dfa(states, alphabet, transitions, initial_states, final_states):
     dfa_states = []
@@ -37,6 +39,7 @@ def nfa_to_dfa(states, alphabet, transitions, initial_states, final_states):
     dfa_final_states = [state for state in dfa_states if any(s in state for s in final_states)]
 
     return dfa_states, alphabet, dfa_transitions, dfa_initial_state, dfa_final_states
+
 
 def main():
     states = input("Enter set of states: ").split()
@@ -65,5 +68,15 @@ def main():
     print("Initial states: " + initial_state_str)
     print("Final states: " + ', '.join(dfa_final_states_str))
 
+
 if __name__ == "__main__":
     main()
+
+
+'''
+1 2 3
+a b
+(1,a,1) (1,a,2) (1,b,3) (2,a,2) (2,b,1) (2,b,3) (3,a,3) (3,b,3)
+1
+3
+'''
