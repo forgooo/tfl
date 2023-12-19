@@ -8,7 +8,7 @@ class TableRow(NamedTuple):
     address: int
 
 
-class IdentifiersTable:
+class IdenTable:
     def __init__(self):
         self.table = {}
         self.n = 0
