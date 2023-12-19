@@ -1,0 +1,17 @@
+program var
+int1, int2, int3: %;
+r1, r2: !;
+l1,l2, l3: $;
+begin
+
+[l1 as true: l2 as true ];
+
+r1 as 2.1e+1;
+
+{l1 as true;
+read(int1, int2);
+}
+for l1 as true to 12 do l2 as true
+
+
+end@
