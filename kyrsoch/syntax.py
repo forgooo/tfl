@@ -1,4 +1,4 @@
-class SyntacticalAnalyzer:
+class Syntax:
     def __init__(self, lexeme_table, identifiersTable):
         self.identifiersTable = identifiersTable
         self.lex_get = self.lexeme_generator(lexeme_table)
